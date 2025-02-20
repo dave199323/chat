@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <style>
+        body { font-family: Arial, sans-serif;}
+        #messages { list-style-type: none; margin: 0; padding: 0; }
+        #messages li { padding: 8px; background:#f4f4f4; margin-bottom: 5px; }
+        #form { display: flex; }
+        #input { flex: 1; padding: 10px; }
+    </style>
+</head>
+<body>
+    <u1 id="messages"></u1>
+    <form id="form">
+        <input id="input" autocomplete="off" placeholder="Type your message..."/>
+        <button type="submit">Send</button>
+    </form>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const form = document.getElementById('form');
+        const input = document.getElementById('input');
+        const messages = document.getElementById('messages');
+
+        const username = prompt('What is your name?');
+
+        socket.on('load messages', (messages) => {
+            messages.forEach(msg => {
+                const item = document.createElement('li');
+                item.textContent = `${msg.username}: ${msg.message}`;
+                messages.appendChild(item);
+            });
+        });
+
+        socket.on('chat message', (msg)=> {
+            const item = document.createElement('li');
+            item.textContent = `${msg.username}: ${msg.message}`;
+            messages.appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (input.value) {
+                socket.emit('chat message', { username, message: input.value });
+                input.value = '';
+            }
+        });
+    </script>
+    
+</body>
+</html>
